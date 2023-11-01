@@ -5,7 +5,7 @@ public class LevelMapController : MonoBehaviour
 {
     public GameObject[] tiles; // An array of prefabs for different tile types
     public Vector2 tileSize = new Vector2(0.1f, 0.1f); // Size of each tile
-
+	public Vector3 mapPosition = Vector3.zero; // Default position is (0, 0, 0)
 
 
 int[,] levelMap =
@@ -27,48 +27,69 @@ int[,] levelMap =
  {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
  };
 
-    void Start()
+     void Start()
     {
         GenerateLevel();
     }
 
-void GenerateLevel()
-{
-    int numRows = levelMap.GetLength(0);
-    int numColumns = levelMap.GetLength(1);
-
-    for (int row = 0; row < numRows; row++)
+    void GenerateLevel()
     {
-        for (int col = 0; col < numColumns; col++)
+        int numRows = levelMap.GetLength(0);
+        int numColumns = levelMap.GetLength(1);
+
+        // Create a parent object to hold the duplicated tiles
+        GameObject tileParent = new GameObject("DuplicatedTiles");
+
+        for (int row = 0; row < numRows; row++)
         {
-            int tileValue = levelMap[row, col];
-
-            // Ensure the tileValue is within the range of the 'tiles' array
-            if (tileValue >= 0 && tileValue < tiles.Length)
+            for (int col = 0; col < numColumns; col++)
             {
-                Vector3 tilePosition = new Vector3(col * tileSize.x, -row * tileSize.y, 0f);
-                GameObject tilePrefab = tiles[tileValue];
+                int tileValue = levelMap[row, col];
 
-                // Instantiate the prefab at the calculated position
-                GameObject tile = Instantiate(tilePrefab, tilePosition, Quaternion.identity);
+                // Ensure the tileValue is within the range of the 'tiles' array
+                if (tileValue >= 0 && tileValue < tiles.Length)
+                {
+                    Vector3 tilePosition = new Vector3(col * tileSize.x, -row * tileSize.y, 0f);
+                    GameObject tilePrefab = tiles[tileValue];
 
-                // Optionally, you can parent the tile to a container for organization
-                // tile.transform.parent = transform;
+                    // Duplicate the tile prefab
+                    GameObject tile = Instantiate(tilePrefab, tilePosition, Quaternion.identity, tileParent.transform);
 
-                // Check if you want to rotate specific tiles
-                if (shouldRotateTile90(row, col)) {
-                    tile.transform.rotation = Quaternion.Euler(0, 0, 90); // Rotate by 90 degrees
-                }
-                if (shouldRotateTile270(row, col)) {
-                    tile.transform.rotation = Quaternion.Euler(0, 0, 270); // Rotate by 90 degrees
-                }
-                if (shouldRotateTile180(row, col)) {
-                    tile.transform.rotation = Quaternion.Euler(0, 0, 180); // Rotate by 90 degrees
+                    // Check if you want to rotate specific tiles
+                    if (shouldRotateTile90(row, col))
+                    {
+                        tile.transform.rotation = Quaternion.Euler(0, 0, 90); // Rotate by 90 degrees
+                    }
+                    if (shouldRotateTile270(row, col))
+                    {
+                        tile.transform.rotation = Quaternion.Euler(0, 0, 270); // Rotate by 90 degrees
+                    }
+                    if (shouldRotateTile180(row, col))
+                    {
+                        tile.transform.rotation = Quaternion.Euler(0, 0, 180); // Rotate by 90 degrees
+                    }
                 }
             }
         }
+
+        // Move the duplicated tiles parent object to the desired position
+        tileParent.transform.position = mapPosition;
+
+		GameObject duplicatedTileParent1 = Instantiate(tileParent);
+        duplicatedTileParent1.transform.localScale = new Vector3(-1, 1, 1);
+    	duplicatedTileParent1.transform.position = new Vector3(3.4f, 2.2f, 0f);
+
+		GameObject duplicatedTileParent2 = Instantiate(tileParent);
+        duplicatedTileParent2.transform.localScale = new Vector3(1, -1, 1);
+    	duplicatedTileParent2.transform.position = new Vector3(-2f, -3.5f, 0f);
+
+		GameObject duplicatedTileParent3 = Instantiate(tileParent);
+        duplicatedTileParent3.transform.localScale = new Vector3(-1, -1, 1);
+    	duplicatedTileParent3.transform.position = new Vector3(3.4f, -3.5f, 0f);
+
     }
-}
+
+
 bool shouldRotateTile180(int row, int col) {
     // Check if the tile at this row and column should be rotated
     // You can implement your custom logic here, such as checking specific rows and columns
@@ -172,4 +193,5 @@ bool shouldRotateTile90(int row, int col) {
     }
     return false; // Do not rotate the tile
 }
+
 }
